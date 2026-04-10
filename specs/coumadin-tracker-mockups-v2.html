@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coumadin Tracker — UI Mockups v2</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f0; margin: 0; padding: 32px 16px; }
+  h1 { text-align: center; font-size: 18px; font-weight: 500; color: #1a1a1a; margin-bottom: 6px; }
+  .subtitle { text-align: center; font-size: 13px; color: #888; margin-bottom: 32px; }
+  .phones { display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; }
+  .phone-wrap { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .phone-label { font-size: 12px; font-weight: 500; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
+  .phone { width: 320px; background: #fff; border: 1px solid #ddd; border-radius: 28px; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+  .phone-bar { background: #f7f7f5; padding: 10px 16px 8px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; }
+  .phone-bar .time { font-size: 13px; font-weight: 500; color: #1a1a1a; }
+  .phone-bar .icons { font-size: 11px; color: #888; letter-spacing: 2px; }
+  .tab-bar { display: flex; border-bottom: 1px solid #eee; background: #fff; }
+  .tab { flex: 1; padding: 10px 4px 8px; text-align: center; font-size: 11px; color: #888; border-bottom: 2px solid transparent; }
+  .tab.active { color: #0F6E56; border-bottom-color: #0F6E56; font-weight: 500; }
+  .tab-icon { font-size: 16px; display: block; margin-bottom: 2px; }
+  .screen { padding: 16px; background: #f7f7f5; min-height: 500px; }
+  .card { background: #fff; border: 1px solid #eee; border-radius: 14px; padding: 14px; margin-bottom: 12px; }
+  .card-title { font-size: 11px; font-weight: 500; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .pill-icon-big { width: 52px; height: 52px; border-radius: 50%; background: #f0f0ec; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; }
+  .pill-icon-taken { background: #EAF3DE; }
+  .status-text { font-size: 15px; font-weight: 500; color: #1a1a1a; text-align: center; margin-bottom: 4px; }
+  .status-text-taken { color: #0F6E56; }
+  .status-sub { font-size: 12px; color: #888; text-align: center; margin-bottom: 12px; }
+  .dose-row { display: flex; gap: 6px; justify-content: center; margin-bottom: 12px; }
+  .dose-chip { padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; border: 1px solid #ddd; color: #666; }
+  .dose-chip.selected { background: #0F6E56; color: #fff; border-color: #0F6E56; }
+  .btn-primary { width: 100%; padding: 11px; background: #0F6E56; color: #fff; border: none; border-radius: 10px; font-size: 14px; font-weight: 500; box-sizing: border-box; }
+  .btn-edit { width: 100%; padding: 10px; background: #EAF3DE; color: #0F6E56; border: none; border-radius: 10px; font-size: 13px; font-weight: 500; box-sizing: border-box; }
+  .btn-settings { width: 100%; padding: 9px; background: #f7f7f5; color: #1a1a1a; border: 1px solid #ddd; border-radius: 10px; font-size: 13px; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 6px; box-sizing: border-box; }
+  .history-strip { display: flex; gap: 4px; justify-content: space-between; }
+  .day-dot { flex: 1; text-align: center; }
+  .day-dot .label { font-size: 10px; color: #aaa; margin-bottom: 4px; }
+  .day-dot .dot { width: 28px; height: 28px; border-radius: 50%; margin: 0 auto 3px; display: flex; align-items: center; justify-content: center; font-size: 13px; }
+  .dot-green { background: #EAF3DE; color: #3B6D11; }
+  .dot-red { background: #FCEBEB; color: #A32D2D; }
+  .dot-gray { background: #f0f0ec; border: 1px solid #ddd; color: #aaa; font-size: 11px; }
+  .day-dot .mg { font-size: 9px; color: #888; }
+  .edit-hint { font-size: 10px; color: #aaa; text-align: center; margin-top: 6px; }
+  .divider { height: 1px; background: #eee; margin: 10px 0; }
+  .settings-panel { background: #f7f7f5; border-radius: 10px; padding: 12px; margin-top: 8px; }
+  .form-label { font-size: 12px; color: #888; margin-bottom: 4px; }
+  .form-row { margin-bottom: 10px; }
+  .form-input { width: 100%; box-sizing: border-box; padding: 7px 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 13px; background: #fff; color: #1a1a1a; }
+  .inr-badge { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 500; }
+  .badge-green { background: #EAF3DE; color: #0F6E56; }
+  .badge-orange { background: #FAEEDA; color: #854F0B; }
+  .history-item { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid #eee; }
+  .history-item:last-child { border-bottom: none; }
+  .hi-left .date { font-size: 12px; color: #888; }
+  .hi-left .note { font-size: 11px; color: #aaa; margin-top: 2px; }
+  .hi-right { text-align: right; }
+  .hi-right .val { font-size: 20px; font-weight: 500; color: #0F6E56; line-height: 1; }
+  .hi-right .val-orange { color: #854F0B; }
+  .predict-big { text-align: center; padding: 14px 0 8px; }
+  .predict-num { font-size: 52px; font-weight: 500; line-height: 1; color: #0F6E56; }
+  .predict-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; margin-top: 8px; background: #EAF3DE; color: #0F6E56; }
+  .predict-label { font-size: 12px; color: #888; margin-top: 6px; line-height: 1.5; }
+  .predict-disclaimer { font-size: 11px; color: #aaa; text-align: center; margin-top: 8px; }
+  .calc-row { display: flex; justify-content: space-between; align-items: baseline; padding: 5px 0; border-bottom: 1px solid #eee; }
+  .calc-row:last-child { border-bottom: none; }
+  .calc-key { font-size: 12px; color: #888; }
+  .calc-val { font-size: 12px; font-weight: 500; color: #1a1a1a; }
+  .formula-box { margin-top: 10px; padding: 8px 10px; background: #f7f7f5; border-radius: 8px; font-size: 12px; color: #666; line-height: 1.6; }
+  .formula-box b { color: #1a1a1a; font-weight: 500; }
+  .interval-header { display: flex; justify-content: space-between; font-size: 10px; color: #aaa; padding-bottom: 4px; border-bottom: 1px solid #eee; margin-bottom: 2px; }
+  .interval-row { display: flex; justify-content: space-between; font-size: 11px; padding: 5px 0; }
+  .change-neg { color: #0F6E56; font-weight: 500; }
+  .modal-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.38); border-radius: 28px; display: flex; align-items: flex-end; }
+  .modal-sheet { background: #fff; border-radius: 16px 16px 0 0; padding: 16px; width: 100%; box-sizing: border-box; }
+  .modal-handle { width: 36px; height: 4px; background: #ddd; border-radius: 2px; margin: 0 auto 12px; }
+  .modal-title { font-size: 14px; font-weight: 500; color: #1a1a1a; margin-bottom: 4px; }
+  .modal-sub { font-size: 12px; color: #888; margin-bottom: 10px; }
+  .modal-dose-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+  .modal-dose-btn { padding: 10px; border: 1px solid #ddd; border-radius: 10px; font-size: 13px; font-weight: 500; text-align: center; color: #1a1a1a; background: #f7f7f5; }
+  .modal-dose-btn.selected { background: #EAF3DE; border-color: #0F6E56; color: #0F6E56; }
+  .modal-skip-btn { width: 100%; padding: 9px; border: 1px solid #F7C1C1; border-radius: 10px; font-size: 13px; color: #A32D2D; background: #FCEBEB; text-align: center; margin-bottom: 8px; box-sizing: border-box; }
+  .modal-save-btn { width: 100%; padding: 10px; background: #0F6E56; color: #fff; border: none; border-radius: 10px; font-size: 14px; font-weight: 500; text-align: center; box-sizing: border-box; }
+  .phone-relative { position: relative; }
+  .form-row-chips { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 4px; }
+  .chart-area { height: 100px; position: relative; margin: 4px 0; }
+  .chart-bg-band { position: absolute; left: 6px; right: 6px; top: 25px; height: 45px; background: #EAF3DE; border-radius: 4px; opacity: 0.7; }
+  .form-row-2 { display: flex; gap: 8px; }
+  .form-row-2 > div { flex: 1; }
+</style>
+</head>
+<body>
+<h1>Coumadin Tracker — UI Mockups</h1>
+<p class="subtitle">Approved v2 · March 2026 · Mobile-first · React + TypeScript</p>
+
+<div class="phones">
+
+  <!-- SCREEN 1a: Pill — not yet taken -->
+  <div class="phone-wrap">
+    <div class="phone-label">Pill — not taken yet</div>
+    <div class="phone">
+      <div class="phone-bar"><span class="time">9:41</span><span class="icons">▲ ◼ ▐▐</span></div>
+      <div class="tab-bar">
+        <div class="tab active"><span class="tab-icon">💊</span>Pill</div>
+        <div class="tab"><span class="tab-icon">🩸</span>INR</div>
+        <div class="tab"><span class="tab-icon">📈</span>Predict</div>
+      </div>
+      <div class="screen">
+        <div class="card">
+          <div class="pill-icon-big">
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><ellipse cx="14" cy="14" rx="9" ry="5.5" transform="rotate(-35 14 14)" fill="#B4B2A9"/><ellipse cx="10.5" cy="16.5" rx="4.5" ry="5.5" transform="rotate(-35 10.5 16.5)" fill="#D3D1C7"/></svg>
+          </div>
+          <div class="status-text">Have you taken your Coumadin today?</div>
+          <div class="status-sub">Saturday, March 14</div>
+          <div class="dose-row">
+            <div class="dose-chip">0.25mg</div>
+            <div class="dose-chip selected">0.5mg</div>
+            <div class="dose-chip">0.75mg</div>
+            <div class="dose-chip">1.0mg</div>
+          </div>
+          <button class="btn-primary">Mark as taken (0.5mg)</button>
+        </div>
+        <div class="card">
+          <div class="card-title">Last 7 days</div>
+          <div class="history-strip">
+            <div class="day-dot"><div class="label">Sat</div><div class="dot dot-gray">?</div><div class="mg">—</div></div>
+            <div class="day-dot"><div class="label">Fri</div><div class="dot dot-green">✓</div><div class="mg">0.5</div></div>
+            <div class="day-dot"><div class="label">Thu</div><div class="dot dot-green">✓</div><div class="mg">0.5</div></div>
+            <div class="day-dot"><div class="label">Wed</div><div class="dot dot-red">✕</div><div class="mg">—</div></div>
+            <div class="day-dot"><div class="label">Tue</div><div class="dot dot-green">✓</div><div class="mg">0.5</div></div>
+            <div class="day-dot"><div class="label">Mon</div><div class="dot dot-green">✓</div><div class="mg">0.5</div></div>
+            <div class="day-dot"><div class="label">Sun</div><div class="dot dot-green">✓</div><div class="mg">0.5</div></div>
+          </div>
+          <div class="edit-hint">Tap any day to edit</div>
+        </div>
+        <button class="btn-settings">⚙ Settings</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 1b: Pill — taken + settings open + edit modal -->
+  <div class="phone-wrap">
+    <div class="phone-label">Pill — taken + edit modal</div>
+    <div class="phone phone-relative">
+      <div class="phone-bar"><span class="time">9:41</span><span class="icons">▲ ◼ ▐▐</span></div>
+      <div class="tab-bar">
+        <div class="tab active"><span class="tab-icon">💊</span>Pill</div>
+        <div class="tab"><span class="tab-icon">🩸</span>INR</div>
+        <div class="tab"><span class="tab-icon">📈</span>Predict</div>
+      </div>
+      <div class="screen" style="filter:brightness(0.9); min-height:560px;">
+        <div class="card">
+          <div class="pill-icon-big pill-icon-taken">
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><ellipse cx="14" cy="14" rx="9" ry="5.5" transform="rotate(-35 14 14)" fill="#3B6D11"/><ellipse cx="10.5" cy="16.5" rx="4.5" ry="5.5" transform="rotate(-35 10.5 16.5)" fill="#97C459"/></svg>
+          </div>
+          <div class="status-text status-text-taken">Taken today at 08:32</div>
+          <div class="status-sub">0.5mg · Saturday, March 14</div>
+          <button class="btn-edit">Edit today's entry</button>
+        </div>
+        <div class="card">
+          <div class="card-title">Settings</div>
+          <div class="settings-panel">
+            <div class="form-row">
+              <div class="form-label">Pill strengths available</div>
+              <div class="form-row-chips">
+                <div class="dose-chip selected" style="font-size:11px;">0.25mg</div>
+                <div class="dose-chip selected" style="font-size:11px;">0.5mg</div>
+                <div class="dose-chip selected" style="font-size:11px;">0.75mg</div>
+                <div class="dose-chip selected" style="font-size:11px;">1.0mg</div>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-label">Default dose</div>
+              <div class="form-input">0.5mg</div>
+            </div>
+            <div class="form-row" style="margin-bottom:0">
+              <div class="form-label">Daily reminder <span style="color:#aaa; font-size:11px;">(coming soon)</span></div>
+              <div class="form-input" style="color:#aaa;">08:00</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-overlay">
+        <div class="modal-sheet">
+          <div class="modal-handle"></div>
+          <div class="modal-title">Edit — Wednesday, March 11</div>
+          <div class="modal-sub">Select dose taken, or mark as skipped</div>
+          <div class="modal-dose-grid">
+            <div class="modal-dose-btn">0.25mg</div>
+            <div class="modal-dose-btn selected">0.5mg</div>
+            <div class="modal-dose-btn">0.75mg</div>
+            <div class="modal-dose-btn">1.0mg</div>
+          </div>
+          <div class="modal-skip-btn">Mark as skipped (✕)</div>
+          <div class="modal-save-btn">Save</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 2: INR tab -->
+  <div class="phone-wrap">
+    <div class="phone-label">INR tracker</div>
+    <div class="phone">
+      <div class="phone-bar"><span class="time">9:41</span><span class="icons">▲ ◼ ▐▐</span></div>
+      <div class="tab-bar">
+        <div class="tab"><span class="tab-icon">💊</span>Pill</div>
+        <div class="tab active"><span class="tab-icon">🩸</span>INR</div>
+        <div class="tab"><span class="tab-icon">📈</span>Predict</div>
+      </div>
+      <div class="screen">
+        <div class="card">
+          <div class="card-title">Add INR result</div>
+          <div class="form-row-2">
+            <div><div class="form-label">INR value</div><div class="form-input">2.4</div></div>
+            <div><div class="form-label">Date of test</div><div class="form-input" style="font-size:12px;">Mar 14, 2026</div></div>
+          </div>
+          <div class="form-row" style="margin-top:8px;">
+            <div class="form-label">Weekly dose (auto) <span style="color:#0F6E56; font-size:11px;">6.5mg ✓</span></div>
+            <div class="form-input" style="color:#888; font-size:12px;">6.5mg &nbsp;·&nbsp; 5 of 7 days logged</div>
+          </div>
+          <div class="form-row">
+            <div class="form-label">Target range</div>
+            <div style="display:flex; gap:6px; align-items:center;">
+              <div class="form-input" style="width:60px;">2.0</div>
+              <span style="font-size:12px; color:#888;">to</span>
+              <div class="form-input" style="width:60px;">3.0</div>
+            </div>
+          </div>
+          <div class="form-row" style="margin-bottom:10px;">
+            <div class="form-label">Notes (optional)</div>
+            <div class="form-input" style="color:#aaa; height:32px; font-size:12px;">Doctor comments…</div>
+          </div>
+          <button class="btn-primary">Save result</button>
+        </div>
+        <div class="card">
+          <div class="card-title">Trend — last 6 tests</div>
+          <div class="chart-area">
+            <div class="chart-bg-band"></div>
+            <svg width="100%" height="100" viewBox="0 0 280 100" preserveAspectRatio="none">
+              <line x1="0" y1="28" x2="280" y2="28" stroke="#C0DD97" stroke-width="0.5" stroke-dasharray="3,2"/>
+              <line x1="0" y1="70" x2="280" y2="70" stroke="#C0DD97" stroke-width="0.5" stroke-dasharray="3,2"/>
+              <polyline points="10,42 60,36 110,58 160,50 210,38 255,44" fill="none" stroke="#0F6E56" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+              <circle cx="10" cy="42" r="4" fill="#0F6E56"/>
+              <circle cx="60" cy="36" r="4" fill="#0F6E56"/>
+              <circle cx="110" cy="58" r="4" fill="#0F6E56"/>
+              <circle cx="160" cy="50" r="4" fill="#0F6E56"/>
+              <circle cx="210" cy="38" r="4" fill="#0F6E56"/>
+              <circle cx="255" cy="44" r="4" fill="#0F6E56"/>
+              <line x1="255" y1="44" x2="274" y2="30" stroke="#854F0B" stroke-width="1.5" stroke-dasharray="3,2"/>
+              <circle cx="274" cy="30" r="5" fill="none" stroke="#854F0B" stroke-width="1.5" stroke-dasharray="3,2"/>
+              <text x="260" y="22" font-size="9" fill="#854F0B" font-family="sans-serif">Est.</text>
+            </svg>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:10px; color:#aaa; margin-top:2px;">
+            <span>Oct</span><span>Nov</span><span>Dec</span><span>Jan</span><span>Feb</span><span>Mar</span><span style="color:#854F0B;">Today</span>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">History</div>
+          <div class="history-item">
+            <div class="hi-left"><div class="date">Mar 3, 2026</div><div class="note">Dose unchanged</div></div>
+            <div class="hi-right"><div class="val">2.4</div><span class="inr-badge badge-green">In range</span></div>
+          </div>
+          <div class="history-item">
+            <div class="hi-left"><div class="date">Feb 17, 2026</div><div class="note">Increased to 1mg</div></div>
+            <div class="hi-right"><div class="val val-orange">1.7</div><span class="inr-badge badge-orange">Below</span></div>
+          </div>
+          <div class="history-item">
+            <div class="hi-left"><div class="date">Feb 3, 2026</div><div class="note">—</div></div>
+            <div class="hi-right"><div class="val">2.8</div><span class="inr-badge badge-green">In range</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 3: Predict tab -->
+  <div class="phone-wrap">
+    <div class="phone-label">INR prediction</div>
+    <div class="phone">
+      <div class="phone-bar"><span class="time">9:41</span><span class="icons">▲ ◼ ▐▐</span></div>
+      <div class="tab-bar">
+        <div class="tab"><span class="tab-icon">💊</span>Pill</div>
+        <div class="tab"><span class="tab-icon">🩸</span>INR</div>
+        <div class="tab active"><span class="tab-icon">📈</span>Predict</div>
+      </div>
+      <div class="screen">
+        <div class="card">
+          <div class="predict-big">
+            <div style="font-size:12px; color:#888;">Estimated INR today</div>
+            <div class="predict-num">2.3</div>
+            <div class="predict-badge">Likely in range</div>
+            <div class="predict-label">Last test was 2.2 on Mar 3<br>You've taken 10.5mg since then</div>
+          </div>
+          <div class="divider"></div>
+          <div class="predict-disclaimer">Estimate only — always confirm with a blood test.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">How it was calculated</div>
+          <div class="calc-row"><span class="calc-key">Reference period</span><span class="calc-val">Feb 18 → Mar 3 (13 days)</span></div>
+          <div class="calc-row"><span class="calc-key">Total dose that period</span><span class="calc-val">13.5mg (7mg + 6.5mg)</span></div>
+          <div class="calc-row"><span class="calc-key">INR change that period</span><span class="calc-val">2.0 → 2.2 (+0.2)</span></div>
+          <div class="calc-row"><span class="calc-key">INR change per mg</span><span class="calc-val">+0.2 ÷ 13.5 = +0.0148</span></div>
+          <div class="calc-row"><span class="calc-key">Dose since last test</span><span class="calc-val">10.5mg (11 days)</span></div>
+          <div class="calc-row"><span class="calc-key">Predicted change</span><span class="calc-val">10.5 × 0.0148 = +0.16</span></div>
+          <div class="calc-row" style="border-bottom:none;">
+            <span class="calc-key" style="font-weight:500; color:#1a1a1a;">Prediction</span>
+            <span class="calc-val" style="color:#0F6E56; font-size:14px;">2.2 + 0.16 = 2.36</span>
+          </div>
+          <div class="formula-box">
+            <b>Formula:</b> Last INR + (dose since last test × rate)<br>
+            Rate = INR change ÷ total dose in reference period
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Reference period breakdown</div>
+          <div class="interval-header">
+            <span>Period</span><span>Week 1</span><span>Week 2</span><span>Total</span><span>INR Δ</span>
+          </div>
+          <div class="interval-row">
+            <span style="color:#888; font-size:10px;">Feb 18 – Mar 3</span>
+            <span>7.0mg</span><span>6.5mg</span><span>13.5mg</span>
+            <span class="change-neg">+0.2</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
