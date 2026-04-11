@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
-import { PillSettings } from '../types';
+import React, { useState, useCallback } from 'react';
+import { PillSettings, PillLogEntry } from '../types';
 import { useDataContext } from '../contexts/DataContext';
-import { getTodayDateString, getDayStatus, getPastNDays, createPillEntry, parseDateLocal } from '../utils/pillLog';
-import { Card, CardTitle, ButtonPrimary, ButtonSecondary, OutlinedButton, Input, Label } from '../components/Shared';
+import { getTodayDateString, createPillEntry, parseDateLocal } from '../utils/pillLog';
+import { Card, ButtonPrimary, ButtonSecondary, OutlinedButton, Input, Label } from '../components/Shared';
+import { PillCalendar } from '../components/PillCalendar';
+import { MonthlyStats } from '../components/MonthlyStats';
+import { EditDayModal } from '../components/EditDayModal';
 import { Settings as SettingsIcon } from 'lucide-react';
 
 export const PillScreen: React.FC = () => {
@@ -11,6 +14,17 @@ export const PillScreen: React.FC = () => {
   const [selectedDose, setSelectedDose] = useState<number | null>(null);
   const [showSettings, setShowSettings] = useState(false);
   const [editingDate, setEditingDate] = useState<string | null>(null);
+
+  // Calendar month tracking (for syncing stats bar with calendar)
+  const now = new Date();
+  const [calendarMonth, setCalendarMonth] = useState(now.getMonth());
+  const [calendarYear, setCalendarYear] = useState(now.getFullYear());
+
+  // All hooks MUST be above the early return
+  const handleMonthChange = useCallback((year: number, month: number) => {
+    setCalendarYear(year);
+    setCalendarMonth(month);
+  }, []);
 
   // Derive effective dose: user selection takes priority, otherwise fall back to default
   const effectiveDose = selectedDose ?? settings?.defaultDoseMg ?? 0;
@@ -24,20 +38,17 @@ export const PillScreen: React.FC = () => {
   }
 
   const todayStr = getTodayDateString();
-  const todayEntry = log.find((e: import('../types').PillLogEntry) => e.date === todayStr);
+  const todayEntry = log.find((e: PillLogEntry) => e.date === todayStr);
   const isTakenToday = !!todayEntry && todayEntry.doseMg > 0;
 
   const handleMarkTaken = async () => {
     const entry = createPillEntry(todayStr, effectiveDose);
-    const newLog = log.filter((e: import('../types').PillLogEntry) => e.date !== todayStr);
-    newLog.push(entry);
-    await savePillLog(newLog);
+    await savePillLog([entry]);
   };
 
   const handleSaveEdit = async (date: string, dose: number) => {
-    const newLog = log.filter((e: import('../types').PillLogEntry) => e.date !== date);
-    newLog.push(createPillEntry(date, dose));
-    await savePillLog(newLog);
+    const entry = createPillEntry(date, dose);
+    await savePillLog([entry]);
     setEditingDate(null);
   };
 
@@ -48,8 +59,12 @@ export const PillScreen: React.FC = () => {
   const todayObj = parseDateLocal(todayStr);
   const displayDate = todayObj.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
 
+  // Find the current dose for the editing date (for the modal)
+  const editingEntry = editingDate ? log.find((e: PillLogEntry) => e.date === editingDate) : null;
+
   return (
     <div className="p-4 bg-screenBg min-h-[calc(100vh-60px)] pb-12">
+      {/* Today status card */}
       <Card className="flex flex-col items-center">
         <div className={`w-[52px] h-[52px] rounded-full flex items-center justify-center mb-2.5 transition-colors ${isTakenToday ? 'bg-pillTaken text-success text-[26px]' : 'bg-pillEmpty text-textMuted text-[26px] border-[0px] shadow-sm'}`}>
           💊
@@ -83,47 +98,25 @@ export const PillScreen: React.FC = () => {
         )}
       </Card>
 
-      <Card>
-        <CardTitle>Last 7 days</CardTitle>
-        <div className="flex justify-between gap-1 mt-3">
-          {getPastNDays(7).reverse().map((date: string) => {
-            const status = getDayStatus(date, log, todayStr);
-            const entry = log.find((e: import('../types').PillLogEntry) => e.date === date);
-            const dObj = parseDateLocal(date);
-            const dayName = dObj.toLocaleDateString('en-US', { weekday: 'short' });
-            
-            let dotClass = 'bg-pillEmpty border-borderDark text-textMuted';
-            let dotChar = '?';
-            
-            if (status === 'taken') {
-              dotClass = 'bg-successBg text-success border-transparent';
-              dotChar = '✓';
-            } else if (status === 'skipped' || status === 'missed') {
-              dotClass = 'bg-dangerBg text-danger border-transparent';
-              dotChar = '✕';
-            }
-            
-            return (
-              <div key={date} className="flex flex-col items-center flex-1 cursor-pointer" onClick={() => setEditingDate(date)}>
-                <div className="text-[10px] text-textMuted mb-1">{dayName}</div>
-                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[13px] mb-1 font-medium border ${dotClass}`}>
-                  {dotChar}
-                </div>
-                <div className="text-[9px] text-textMuted">{status === 'taken' ? entry?.doseMg : '—'}</div>
-              </div>
-            );
-          })}
-        </div>
-        <div className="text-[10px] text-textMuted text-center mt-3">Tap any day to edit</div>
-      </Card>
+      {/* Monthly stats bar */}
+      <MonthlyStats pillLog={log} month={calendarMonth} year={calendarYear} />
+
+      {/* Full calendar */}
+      <PillCalendar
+        pillLog={log}
+        onDayPress={setEditingDate}
+        onMonthChange={handleMonthChange}
+      />
       
+      {/* Settings toggle */}
       <OutlinedButton onClick={() => setShowSettings(!showSettings)} className="mb-3">
         <SettingsIcon size={14} /> Settings
       </OutlinedButton>
       
+      {/* Settings panel */}
       {showSettings ? (
         <Card>
-          <CardTitle>Settings</CardTitle>
+          <div className="text-[11px] font-medium text-textMuted uppercase tracking-wide mb-2">Settings</div>
           <div className="bg-screenBg rounded-lg p-3 mt-2 space-y-3">
             <div>
               <Label>Pill strengths available</Label>
@@ -151,42 +144,16 @@ export const PillScreen: React.FC = () => {
         </Card>
       ) : null}
 
+      {/* Edit day modal */}
       {editingDate ? (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-end sm:items-center sm:justify-center">
-          <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full max-w-md p-4 pb-8 sm:pb-4 animate-in slide-in-from-bottom-4 shadow-lg">
-            <div className="w-9 h-1 bg-borderDark rounded-full mx-auto mb-3 sm:hidden" />
-            
-            <div className="flex justify-between items-baseline mb-1">
-              <h3 className="text-sm font-medium text-textMain">
-                Edit — {parseDateLocal(editingDate).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
-              </h3>
-            </div>
-            <p className="text-xs text-textMuted mb-3">Select dose taken, or mark as skipped</p>
-            
-            <div className="grid grid-cols-2 gap-2 mb-3">
-              {settings.availableStrengths.map((dose: number) => {
-                const activeDose = log.find((e: import('../types').PillLogEntry) => e.date === editingDate)?.doseMg;
-                const isSavedDose = activeDose === dose || (!activeDose && dose === settings.defaultDoseMg);
-                return (
-                  <button 
-                    key={dose} 
-                    onClick={() => handleSaveEdit(editingDate, dose)}
-                    className={`p-2.5 border rounded-[10px] text-[13px] font-medium text-center transition-colors ${isSavedDose ? 'bg-successBg text-primary border-primary' : 'bg-screenBg text-textMain border-borderLight hover:border-primary'}`}
-                  >
-                    {dose}mg
-                  </button>
-                );
-              })}
-            </div>
-            
-            <button onClick={() => handleSaveEdit(editingDate, 0)} className="w-full p-[9px] border border-dangerBorder rounded-[10px] text-[13px] text-danger bg-dangerBg text-center mb-2 box-border focus:outline-none hover:opacity-90 transition-opacity">
-              Mark as skipped (✕)
-            </button>
-            <button onClick={() => setEditingDate(null)} className="w-full text-xs text-textMuted py-2 text-center hover:text-textMain">
-              Cancel
-            </button>
-          </div>
-        </div>
+        <EditDayModal
+          date={editingDate}
+          currentDoseMg={editingEntry ? editingEntry.doseMg : null}
+          availableStrengths={settings.availableStrengths}
+          defaultDoseMg={settings.defaultDoseMg}
+          onSave={handleSaveEdit}
+          onClose={() => setEditingDate(null)}
+        />
       ) : null}
     </div>
   );

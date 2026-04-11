@@ -9,13 +9,13 @@ import {
 } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBjw5NhGeBRIWO5EVWkGFXdfjspEDEOQsM",
-  authDomain: "coumadin-tracker-app-652ea.firebaseapp.com",
-  projectId: "coumadin-tracker-app-652ea",
-  storageBucket: "coumadin-tracker-app-652ea.firebasestorage.app",
-  messagingSenderId: "781153295365",
-  appId: "1:781153295365:web:0cc02b98dccb2c844f506c",
-  measurementId: "G-K279RVQEDL",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
 export const app = initializeApp(firebaseConfig);

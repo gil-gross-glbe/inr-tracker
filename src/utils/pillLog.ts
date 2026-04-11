@@ -1,6 +1,6 @@
 import { PillLogEntry } from '../types';
 
-export type DayStatus = 'taken' | 'skipped' | 'missed' | 'today' | 'future';
+export type DayStatus = 'taken' | 'skipped' | 'missed' | 'today' | 'future' | 'empty';
 
 // Helper to avoid timezone shifting when creating Dates from YYYY-MM-DD
 export const parseDateLocal = (dateStr: string): Date => {
@@ -58,7 +58,7 @@ export const getDayStatus = (date: string, pillLog: PillLogEntry[], todayStr = g
   if (dateObj === todayObj) {
     return 'today';
   } else if (dateObj < todayObj) {
-    return 'missed';
+    return 'empty';
   } else {
     return 'future';
   }
