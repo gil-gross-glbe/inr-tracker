@@ -1,9 +1,11 @@
 import React, { createContext, useContext, useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { useAuth } from './AuthContext';
 import { db } from '../config/firebase';
-import { doc, collection, setDoc, writeBatch, onSnapshot, type Unsubscribe } from 'firebase/firestore';
+import { doc, collection, setDoc, writeBatch, onSnapshot, query, where, type Unsubscribe } from 'firebase/firestore';
 import { PillLogEntry, PillSettings, INRResult, TargetRange } from '../types';
 import { DEFAULT_SETTINGS, DEFAULT_TARGET_RANGE } from '../utils/localStorage';
+
+
 
 interface DataContextType {
   pillLog: PillLogEntry[];
@@ -39,8 +41,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return;
     }
     setPillLogLoading(true);
+    const sixMonthsAgo = Date.now() - (180 * 24 * 60 * 60 * 1000);
     pillLogUnsub.current = onSnapshot(
-      collection(db, `users/${user.uid}/pillLogs`),
+      query(
+        collection(db, `users/${user.uid}/pillLogs`),
+        where('takenTimestamp', '>=', sixMonthsAgo)
+      ),
       (snapshot) => {
         const entries = snapshot.docs
           .map((d) => d.data() as PillLogEntry)
@@ -59,7 +65,16 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [user]);
 
   const savePillLog = useCallback(async (entries: PillLogEntry[]): Promise<void> => {
+    // Optimistic update: always update local state immediately
+    setPillLog(prev => {
+      const dateSet = new Set(entries.map(e => e.date));
+      return [...prev.filter(e => !dateSet.has(e.date)), ...entries]
+        .sort((a, b) => b.takenTimestamp - a.takenTimestamp);
+    });
+
+
     if (!user) return;
+    
     try {
       const batch = writeBatch(db);
       entries.forEach((entry) => {
@@ -84,8 +99,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return;
     }
     setInrResultsLoading(true);
+    const sixMonthsAgo = Date.now() - (180 * 24 * 60 * 60 * 1000);
     inrResultsUnsub.current = onSnapshot(
-      collection(db, `users/${user.uid}/inrResults`),
+      query(
+        collection(db, `users/${user.uid}/inrResults`),
+        where('createdAt', '>=', sixMonthsAgo)
+      ),
       (snapshot) => {
         const results = snapshot.docs
           .map((d) => d.data() as INRResult)
@@ -104,6 +123,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [user]);
 
   const saveINRResults = useCallback(async (results: INRResult[]): Promise<void> => {
+    // Optimistic update
+    setInrResults(prev => {
+      const idSet = new Set(results.map(r => r.id));
+      return [...prev.filter(r => !idSet.has(r.id)), ...results]
+        .sort((a, b) => a.createdAt - b.createdAt);
+    });
+
+
     if (!user) return;
     try {
       const batch = writeBatch(db);
@@ -152,6 +179,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [user]);
 
   const saveSettings = useCallback(async (pillSettings: PillSettings): Promise<void> => {
+    // Optimistic update
+    setSettingsState(pillSettings);
+
+
     if (!user) return;
     try {
       await setDoc(doc(db, `users/${user.uid}/settings`, 'appSettings'), { pillSettings }, { merge: true });
@@ -159,6 +190,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [user]);
 
   const saveTargetRange = useCallback(async (range: TargetRange): Promise<void> => {
+    // Optimistic update
+    setTargetRangeState(range);
+
+
     if (!user) return;
     try {
       await setDoc(doc(db, `users/${user.uid}/settings`, 'appSettings'), { targetRange: range }, { merge: true });

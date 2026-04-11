@@ -25,18 +25,22 @@ export const useAuth = () => useContext(AuthContext);
 
 const MIGRATION_TIMEOUT_MS = 5000;
 
+
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Handle redirect result on mount (fallback from signInWithRedirect)
   useEffect(() => {
+
     getRedirectResult(auth).catch(() => {
       // Redirect result is only present after a redirect flow — ignore otherwise
     });
   }, []);
 
   useEffect(() => {
+
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         // Run migration with a timeout so the app never hangs
