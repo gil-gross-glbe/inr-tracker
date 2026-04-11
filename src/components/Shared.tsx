@@ -55,7 +55,7 @@ export const Label: React.FC<React.LabelHTMLAttributes<HTMLLabelElement> & { rig
     <label className={`block text-xs text-textMuted ${className}`} {...props}>
       {children}
     </label>
-    {rightText && <div className="text-[11px] text-primary">{rightText}</div>}
+    {rightText ? <div className="text-[11px] text-primary">{rightText}</div> : null}
   </div>
 );
 

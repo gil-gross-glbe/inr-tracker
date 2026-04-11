@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { PillSettings } from '../types';
 import { useDataContext } from '../contexts/DataContext';
 import { getTodayDateString, getDayStatus, getPastNDays, createPillEntry, parseDateLocal } from '../utils/pillLog';
@@ -8,16 +8,12 @@ import { Settings as SettingsIcon } from 'lucide-react';
 export const PillScreen: React.FC = () => {
   const { pillLog: log, savePillLog, settings, saveSettings, isLoading } = useDataContext();
   
-  const [selectedDose, setSelectedDose] = useState<number>(0);
+  const [selectedDose, setSelectedDose] = useState<number | null>(null);
   const [showSettings, setShowSettings] = useState(false);
   const [editingDate, setEditingDate] = useState<string | null>(null);
 
-  // Initialize selected dose when settings load
-  useEffect(() => {
-    if (settings && selectedDose === 0) {
-      setSelectedDose(settings.defaultDoseMg);
-    }
-  }, [settings, selectedDose]);
+  // Derive effective dose: user selection takes priority, otherwise fall back to default
+  const effectiveDose = selectedDose ?? settings?.defaultDoseMg ?? 0;
 
   if (isLoading || !settings) {
     return (
@@ -32,7 +28,7 @@ export const PillScreen: React.FC = () => {
   const isTakenToday = !!todayEntry && todayEntry.doseMg > 0;
 
   const handleMarkTaken = async () => {
-    const entry = createPillEntry(todayStr, selectedDose);
+    const entry = createPillEntry(todayStr, effectiveDose);
     const newLog = log.filter((e: import('../types').PillLogEntry) => e.date !== todayStr);
     newLog.push(entry);
     await savePillLog(newLog);
@@ -74,14 +70,14 @@ export const PillScreen: React.FC = () => {
                 <button 
                   key={dose}
                   onClick={() => setSelectedDose(dose)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium border ${selectedDose === dose ? 'bg-primary border-primary text-white' : 'border-borderDark text-textSub'}`}
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium border ${effectiveDose === dose ? 'bg-primary border-primary text-white' : 'border-borderDark text-textSub'}`}
                 >
                   {dose}mg
                 </button>
               ))}
             </div>
             <ButtonPrimary onClick={handleMarkTaken}>
-              Mark as taken ({selectedDose}mg)
+              Mark as taken ({effectiveDose}mg)
             </ButtonPrimary>
           </>
         )}
@@ -125,7 +121,7 @@ export const PillScreen: React.FC = () => {
         <SettingsIcon size={14} /> Settings
       </OutlinedButton>
       
-      {showSettings && (
+      {showSettings ? (
         <Card>
           <CardTitle>Settings</CardTitle>
           <div className="bg-screenBg rounded-lg p-3 mt-2 space-y-3">
@@ -153,9 +149,9 @@ export const PillScreen: React.FC = () => {
             </div>
           </div>
         </Card>
-      )}
+      ) : null}
 
-      {editingDate && (
+      {editingDate ? (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-end sm:items-center sm:justify-center">
           <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full max-w-md p-4 pb-8 sm:pb-4 animate-in slide-in-from-bottom-4 shadow-lg">
             <div className="w-9 h-1 bg-borderDark rounded-full mx-auto mb-3 sm:hidden" />
@@ -191,7 +187,7 @@ export const PillScreen: React.FC = () => {
             </button>
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 };

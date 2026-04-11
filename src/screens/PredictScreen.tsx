@@ -86,9 +86,9 @@ export const PredictScreen: React.FC = () => {
         <div className="text-xs text-textMuted mt-3 leading-relaxed">
           Last test was {prediction.inrEnd} on {formatD(prediction.periodEndDate)}<br />
           You've taken {prediction.doseSinceLastTest}mg since then
-          {prediction.doseSinceLastTest === 0 && (
+          {prediction.doseSinceLastTest === 0 ? (
              <span className="block mt-1 text-warning">— No doses logged since your last test —<br/>showing last known INR.</span>
-          )}
+          ) : null}
         </div>
         
         <div className="h-px bg-borderLight my-4 w-full" />
@@ -105,7 +105,7 @@ export const PredictScreen: React.FC = () => {
           </button>
         </div>
         
-        {showCalculation && (
+        {showCalculation ? (
           <div className="space-y-2 text-xs">
              <div className="flex justify-between border-b border-borderLight py-1.5">
                <span className="text-textMuted">Reference period</span>
@@ -143,7 +143,7 @@ export const PredictScreen: React.FC = () => {
                Rate = INR change ÷ total dose in reference period
              </div>
           </div>
-        )}
+        ) : null}
       </Card>
     </div>
   );

@@ -44,12 +44,12 @@ export const LoginScreen: React.FC = () => {
         <p className="text-slate-400 mb-10 text-center text-lg">Your health data, securely synced.</p>
 
         <div className="w-full bg-slate-800/50 backdrop-blur-xl border border-white/10 p-8 rounded-3xl shadow-2xl mb-8 flex flex-col items-center">
-          {error && (
+          {error ? (
             <div className="w-full mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-xl flex items-start gap-2">
               <AlertCircle size={16} className="text-red-400 mt-0.5 shrink-0" />
               <p className="text-red-300 text-sm">{error}</p>
             </div>
-          )}
+          ) : null}
           <button 
             onClick={handleLogin}
             disabled={isLoggingIn}

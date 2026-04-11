@@ -31,9 +31,9 @@ function AppContent() {
         <TabBar activeTab={activeTab} onTabChange={setActiveTab} />
         
         <div className="flex-1 overflow-y-auto w-full bg-screenBg relative">
-          {activeTab === 'pill' && <PillScreen />}
-          {activeTab === 'inr' && <INRScreen />}
-          {activeTab === 'predict' && <PredictScreen />}
+          {activeTab === 'pill' ? <PillScreen /> : null}
+          {activeTab === 'inr' ? <INRScreen /> : null}
+          {activeTab === 'predict' ? <PredictScreen /> : null}
         </div>
       </div>
     </div>

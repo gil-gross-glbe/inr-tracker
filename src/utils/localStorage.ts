@@ -28,28 +28,12 @@ export const loadPillLog = (): PillLogEntry[] => {
   }
 };
 
-export const savePillLog = (entries: PillLogEntry[]): void => {
-  try {
-    localStorage.setItem(KEYS.PILL_LOG, JSON.stringify(entries));
-  } catch (e) {
-    console.error('Failed to save pill log', e);
-  }
-};
-
 export const loadSettings = (): PillSettings => {
   try {
     const data = localStorage.getItem(KEYS.PILL_SETTINGS);
     return data ? JSON.parse(data) : DEFAULT_SETTINGS;
   } catch {
     return DEFAULT_SETTINGS;
-  }
-};
-
-export const saveSettings = (settings: PillSettings): void => {
-  try {
-    localStorage.setItem(KEYS.PILL_SETTINGS, JSON.stringify(settings));
-  } catch (e) {
-    console.error('Failed to save settings', e);
   }
 };
 
@@ -62,27 +46,11 @@ export const loadINRResults = (): INRResult[] => {
   }
 };
 
-export const saveINRResults = (results: INRResult[]): void => {
-  try {
-    localStorage.setItem(KEYS.INR_RESULTS, JSON.stringify(results));
-  } catch (e) {
-    console.error('Failed to save INR results', e);
-  }
-};
-
 export const loadTargetRange = (): TargetRange => {
   try {
     const data = localStorage.getItem(KEYS.TARGET_RANGE);
     return data ? JSON.parse(data) : DEFAULT_TARGET_RANGE;
   } catch {
     return DEFAULT_TARGET_RANGE;
-  }
-};
-
-export const saveTargetRange = (range: TargetRange): void => {
-  try {
-    localStorage.setItem(KEYS.TARGET_RANGE, JSON.stringify(range));
-  } catch (e) {
-    console.error('Failed to save target range', e);
   }
 };

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useRef, useState, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { useAuth } from './AuthContext';
 import { db } from '../config/firebase';
 import { doc, collection, setDoc, writeBatch, onSnapshot, type Unsubscribe } from 'firebase/firestore';
@@ -167,11 +167,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const isLoading = pillLogLoading || inrResultsLoading || settingsLoading;
 
+  const contextValue = useMemo(() => ({
+    pillLog, inrResults, settings, targetRange, isLoading,
+    savePillLog, saveINRResults, saveSettings, saveTargetRange
+  }), [pillLog, inrResults, settings, targetRange, isLoading,
+       savePillLog, saveINRResults, saveSettings, saveTargetRange]);
+
   return (
-    <DataContext.Provider value={{
-      pillLog, inrResults, settings, targetRange, isLoading,
-      savePillLog, saveINRResults, saveSettings, saveTargetRange
-    }}>
+    <DataContext.Provider value={contextValue}>
       {children}
     </DataContext.Provider>
   );
