@@ -1,4 +1,5 @@
-import { PillLogEntry, PillSettings, INRResult, TargetRange } from '../types';
+import { PillLogEntry, PillSettings, INRResult, TargetRange, BottleState } from '../types';
+import { getTodayDateString } from './pillLog';
 
 const KEYS = {
   PILL_LOG: 'pill_log',
@@ -6,12 +7,22 @@ const KEYS = {
   INR_RESULTS: 'inr_results',
   TARGET_RANGE: 'inr_target_range',
   REMINDER_TIME: 'reminder_time', // For backwards compatibility if needed
+  BOTTLE_STATE: 'bottle_state',
 };
 
 export const DEFAULT_SETTINGS: PillSettings = {
-  availableStrengths: [0.25, 0.5, 0.75, 1.0],
-  defaultDoseMg: 0.5,
+  availableStrengths: [0.5, 1.0, 1.5, 2.0],
+  defaultDoseMg: 5,
+  defaultDosePills: 1.0,
+  defaultPillsPerBottle: 30,
   reminderTime: '08:00',
+};
+
+export const DEFAULT_BOTTLE_STATE: BottleState = {
+  openedDate: getTodayDateString(),
+  initialCount: 30,
+  adjustmentCount: 0,
+  pillsPerBottle: 30,
 };
 
 export const DEFAULT_TARGET_RANGE: TargetRange = {
@@ -37,6 +48,15 @@ export const loadSettings = (): PillSettings => {
   }
 };
 
+export const loadBottleState = (): BottleState => {
+  try {
+    const data = localStorage.getItem(KEYS.BOTTLE_STATE);
+    return data ? JSON.parse(data) : DEFAULT_BOTTLE_STATE;
+  } catch {
+    return DEFAULT_BOTTLE_STATE;
+  }
+};
+
 export const loadINRResults = (): INRResult[] => {
   try {
     const data = localStorage.getItem(KEYS.INR_RESULTS);
@@ -54,3 +74,4 @@ export const loadTargetRange = (): TargetRange => {
     return DEFAULT_TARGET_RANGE;
   }
 };
+
