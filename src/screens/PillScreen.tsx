@@ -148,7 +148,7 @@ export const PillScreen: React.FC = () => {
       {editingDate ? (
         <EditDayModal
           date={editingDate}
-          currentPillDose={editingEntry ? (editingEntry.dosePills ?? (editingEntry.doseMg <= 2.5 && editingEntry.doseMg > 0 ? 0.5 : 1)) : null}
+          currentPillDose={editingEntry ? (editingEntry.dosePills ?? (editingEntry.doseMg > 0 ? editingEntry.doseMg / 0.5 : 0)) : null}
           onSave={handleSaveEdit}
           onClose={() => setEditingDate(null)}
         />

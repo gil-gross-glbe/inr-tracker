@@ -11,8 +11,8 @@ const KEYS = {
 };
 
 export const DEFAULT_SETTINGS: PillSettings = {
-  availableStrengths: [0.5, 1.0, 1.5, 2.0],
-  defaultDoseMg: 5,
+  availableStrengths: [0.25, 0.5, 0.75, 1.0],
+  defaultDoseMg: 0.5,
   defaultDosePills: 1.0,
   defaultPillsPerBottle: 30,
   reminderTime: '08:00',

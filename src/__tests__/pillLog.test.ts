@@ -143,8 +143,8 @@ describe('pillLog utilities', () => {
     it('getEntryPills retrieves pill count from both new and legacy formats', () => {
       expect(getEntryPills(createPillEntry('2026-03-10', 1.0, true))).toBe(1.0);
       expect(getEntryPills(createPillEntry('2026-03-10', 0.5, true))).toBe(0.5);
-      expect(getEntryPills({ date: '2026-03-10', takenAt: '08:00', takenTimestamp: 1, doseMg: 5 })).toBe(1.0);
-      expect(getEntryPills({ date: '2026-03-10', takenAt: '08:00', takenTimestamp: 1, doseMg: 2.5 })).toBe(0.5);
+      expect(getEntryPills({ date: '2026-03-10', takenAt: '08:00', takenTimestamp: 1, doseMg: 0.5 })).toBe(1.0);
+      expect(getEntryPills({ date: '2026-03-10', takenAt: '08:00', takenTimestamp: 1, doseMg: 0.25 })).toBe(0.5);
     });
 
     it('formatPillLabel and formatPillQuantity format properly', () => {

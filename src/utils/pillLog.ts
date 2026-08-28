@@ -37,9 +37,7 @@ export const getEntryPills = (entry: PillLogEntry): number => {
     return entry.dosePills;
   }
   if (entry.doseMg === 0) return 0;
-  if (entry.doseMg <= 2.5) return 0.5;
-  if (entry.doseMg === 5) return 1;
-  return entry.doseMg / 5;
+  return entry.doseMg / 0.5; // 0.5 mg = 1 pill
 };
 
 export const formatPillLabel = (pills: number): string => {
@@ -122,8 +120,8 @@ export const createPillEntry = (date: string, dose: number, isPillUnit = false):
   const hours = String(now.getHours()).padStart(2, '0');
   const minutes = String(now.getMinutes()).padStart(2, '0');
   
-  const dosePills = isPillUnit ? dose : (dose === 0 ? 0 : (dose <= 2.5 ? 0.5 : (dose === 5 ? 1 : dose / 5)));
-  const doseMg = isPillUnit ? dose * 5 : dose;
+  const dosePills = isPillUnit ? dose : (dose === 0 ? 0 : dose / 0.5);
+  const doseMg = isPillUnit ? dose * 0.5 : dose;
 
   return {
     date,
