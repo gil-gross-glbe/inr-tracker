@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useRef, useState, useCallb
 import { useAuth } from './AuthContext';
 import { db } from '../config/firebase';
 import { doc, collection, setDoc, writeBatch, onSnapshot, query, where, type Unsubscribe } from 'firebase/firestore';
+import { PillLogEntry, PillSettings, INRResult, TargetRange, BottleState } from '../types';
 import {
   DEFAULT_SETTINGS,
   DEFAULT_TARGET_RANGE,
