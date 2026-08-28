@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { Activity, ShieldCheck, CloudLightning, ActivitySquare, AlertCircle } from 'lucide-react';
 
 export const LoginScreen: React.FC = () => {
-  const { signInWithGoogle } = useAuth();
+  const { signInWithGoogle, loginAsGuest } = useAuth();
   const [isLoggingIn, setIsLoggingIn] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
@@ -53,14 +53,22 @@ export const LoginScreen: React.FC = () => {
           <button 
             onClick={handleLogin}
             disabled={isLoggingIn}
-            className="w-full py-4 px-6 bg-white text-slate-900 rounded-xl font-semibold flex items-center justify-center gap-3 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:hover:scale-100 shadow-xl shadow-white/10"
+            className="w-full py-3.5 px-6 bg-white text-slate-900 rounded-xl font-semibold flex items-center justify-center gap-3 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:hover:scale-100 shadow-xl shadow-white/10 mb-3"
           >
             {isLoggingIn ? (
-              <Activity className="animate-spin text-slate-600" size={24} />
+              <Activity className="animate-spin text-slate-600" size={20} />
             ) : (
-              <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-6 h-6" />
+              <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-5 h-5" />
             )}
             {isLoggingIn ? 'Connecting securely...' : 'Sign in with Google'}
+          </button>
+
+          <button
+            onClick={loginAsGuest}
+            type="button"
+            className="w-full py-2.5 px-4 bg-slate-700/50 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-medium border border-white/10 transition-all flex items-center justify-center gap-1.5"
+          >
+            <span>Try Instant Demo (Guest Mode)</span>
           </button>
         </div>
 
