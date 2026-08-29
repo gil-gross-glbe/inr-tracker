@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { PillLogEntry } from '../types';
 import { toDateString } from '../utils/calendarUtils';
-import { getDayStatus } from '../utils/pillLog';
+import { getDayStatus, getEntryPills, formatPillQuantity } from '../utils/pillLog';
 
 interface MonthlyStatsProps {
   pillLog: PillLogEntry[];
@@ -10,7 +10,7 @@ interface MonthlyStatsProps {
 }
 
 export const MonthlyStats: React.FC<MonthlyStatsProps> = ({ pillLog, month, year }) => {
-  const { taken, missed, totalDose } = useMemo(() => {
+  const { taken, missed, totalPills } = useMemo(() => {
     const now = new Date();
     const todayYear = now.getFullYear();
     const todayMonth = now.getMonth();
@@ -23,11 +23,11 @@ export const MonthlyStats: React.FC<MonthlyStatsProps> = ({ pillLog, month, year
         ? todayDay
         : year < todayYear || (year === todayYear && month < todayMonth)
           ? lastDayInMonth
-          : 0; // future month → 0 days to count
+          : 0;
 
     let takenCount = 0;
     let missedCount = 0;
-    let dose = 0;
+    let pills = 0;
 
     for (let day = 1; day <= maxDay; day++) {
       const dateStr = toDateString(year, month, day);
@@ -36,32 +36,32 @@ export const MonthlyStats: React.FC<MonthlyStatsProps> = ({ pillLog, month, year
       if (status === 'taken') {
         takenCount++;
         const entry = pillLog.find((e) => e.date === dateStr);
-        if (entry) dose += entry.doseMg;
+        if (entry) pills += getEntryPills(entry);
       } else if (status === 'skipped' || status === 'missed') {
         missedCount++;
       }
-      // 'today' (not yet logged) is not counted in either bucket
     }
 
-    return { taken: takenCount, missed: missedCount, totalDose: dose };
+    return { taken: takenCount, missed: missedCount, totalPills: pills };
   }, [pillLog, month, year]);
 
-  const doseLabel = totalDose % 1 === 0 ? `${totalDose}mg` : `${totalDose.toFixed(1)}mg`;
+  const adherence = taken + missed > 0 ? Math.round((taken / (taken + missed)) * 100) : 100;
 
   return (
-    <div className="flex bg-white border border-borderLight rounded-xl overflow-hidden mb-3 shadow-sm">
-      <div className="flex-1 text-center py-2.5 px-1">
-        <div className="text-lg font-medium text-primary leading-none">{taken}</div>
-        <div className="text-[10px] text-textMuted mt-0.5">taken</div>
+    <div className="flex bg-white border border-borderLight rounded-2xl overflow-hidden shadow-sm">
+      <div className="flex-1 text-center py-3 px-1">
+        <div className="text-xl font-bold text-primary leading-none">{taken}</div>
+        <div className="text-[10px] font-medium text-textMuted uppercase tracking-wider mt-1">Days Taken</div>
       </div>
-      <div className="flex-1 text-center py-2.5 px-1 border-l border-borderLight">
-        <div className="text-lg font-medium text-danger leading-none">{missed}</div>
-        <div className="text-[10px] text-textMuted mt-0.5">missed</div>
+      <div className="flex-1 text-center py-3 px-1 border-l border-borderLight">
+        <div className="text-xl font-bold text-textMain leading-none">{formatPillQuantity(totalPills)}</div>
+        <div className="text-[10px] font-medium text-textMuted uppercase tracking-wider mt-1">Pills Used</div>
       </div>
-      <div className="flex-1 text-center py-2.5 px-1 border-l border-borderLight">
-        <div className="text-lg font-medium text-textMain leading-none">{doseLabel}</div>
-        <div className="text-[10px] text-textMuted mt-0.5">total dose</div>
+      <div className="flex-1 text-center py-3 px-1 border-l border-borderLight">
+        <div className="text-xl font-bold text-textMain leading-none">{adherence}%</div>
+        <div className="text-[10px] font-medium text-textMuted uppercase tracking-wider mt-1">Adherence</div>
       </div>
     </div>
   );
 };
+

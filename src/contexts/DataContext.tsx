@@ -2,20 +2,29 @@ import React, { createContext, useContext, useEffect, useRef, useState, useCallb
 import { useAuth } from './AuthContext';
 import { db } from '../config/firebase';
 import { doc, collection, setDoc, writeBatch, onSnapshot, query, where, type Unsubscribe } from 'firebase/firestore';
-import { PillLogEntry, PillSettings, INRResult, TargetRange } from '../types';
-import { DEFAULT_SETTINGS, DEFAULT_TARGET_RANGE } from '../utils/localStorage';
-
-
+import { PillLogEntry, PillSettings, INRResult, TargetRange, BottleState } from '../types';
+import {
+  DEFAULT_SETTINGS,
+  DEFAULT_TARGET_RANGE,
+  DEFAULT_BOTTLE_STATE,
+  loadPillLog,
+  loadINRResults,
+  loadSettings,
+  loadBottleState,
+  loadTargetRange,
+} from '../utils/localStorage';
 
 interface DataContextType {
   pillLog: PillLogEntry[];
   inrResults: INRResult[];
   settings: PillSettings;
+  bottleState: BottleState;
   targetRange: TargetRange;
   isLoading: boolean;
   savePillLog: (entries: PillLogEntry[]) => Promise<void>;
   saveINRResults: (results: INRResult[]) => Promise<void>;
   saveSettings: (pillSettings: PillSettings) => Promise<void>;
+  saveBottleState: (bottleState: BottleState) => Promise<void>;
   saveTargetRange: (range: TargetRange) => Promise<void>;
 }
 
@@ -37,6 +46,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     if (!user) {
       setPillLog([]);
+      setPillLogLoading(false);
+      return;
+    }
+    if (user.uid === 'guest_user') {
+      setPillLog(loadPillLog());
       setPillLogLoading(false);
       return;
     }
@@ -65,15 +79,19 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [user]);
 
   const savePillLog = useCallback(async (entries: PillLogEntry[]): Promise<void> => {
-    // Optimistic update: always update local state immediately
+    let updated: PillLogEntry[] = [];
     setPillLog(prev => {
       const dateSet = new Set(entries.map(e => e.date));
-      return [...prev.filter(e => !dateSet.has(e.date)), ...entries]
+      updated = [...prev.filter(e => !dateSet.has(e.date)), ...entries]
         .sort((a, b) => b.takenTimestamp - a.takenTimestamp);
+      return updated;
     });
 
-
     if (!user) return;
+    if (user.uid === 'guest_user') {
+      localStorage.setItem('pill_log', JSON.stringify(updated));
+      return;
+    }
     
     try {
       const batch = writeBatch(db);
@@ -95,6 +113,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     if (!user) {
       setInrResults([]);
+      setInrResultsLoading(false);
+      return;
+    }
+    if (user.uid === 'guest_user') {
+      setInrResults(loadINRResults());
       setInrResultsLoading(false);
       return;
     }
@@ -123,15 +146,19 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [user]);
 
   const saveINRResults = useCallback(async (results: INRResult[]): Promise<void> => {
-    // Optimistic update
+    let updated: INRResult[] = [];
     setInrResults(prev => {
       const idSet = new Set(results.map(r => r.id));
-      return [...prev.filter(r => !idSet.has(r.id)), ...results]
+      updated = [...prev.filter(r => !idSet.has(r.id)), ...results]
         .sort((a, b) => a.createdAt - b.createdAt);
+      return updated;
     });
 
-
     if (!user) return;
+    if (user.uid === 'guest_user') {
+      localStorage.setItem('inr_results', JSON.stringify(updated));
+      return;
+    }
     try {
       const batch = writeBatch(db);
       results.forEach((result) => {
@@ -144,8 +171,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [user]);
 
-  // ----- Settings -----
+  // ----- Settings & Bottle State -----
   const [settings, setSettingsState] = useState<PillSettings>(DEFAULT_SETTINGS);
+  const [bottleState, setBottleState] = useState<BottleState>(DEFAULT_BOTTLE_STATE);
   const [targetRange, setTargetRangeState] = useState<TargetRange>(DEFAULT_TARGET_RANGE);
   const [settingsLoading, setSettingsLoading] = useState(true);
   const settingsUnsub = useRef<Unsubscribe | null>(null);
@@ -153,7 +181,15 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     if (!user) {
       setSettingsState(DEFAULT_SETTINGS);
+      setBottleState(DEFAULT_BOTTLE_STATE);
       setTargetRangeState(DEFAULT_TARGET_RANGE);
+      setSettingsLoading(false);
+      return;
+    }
+    if (user.uid === 'guest_user') {
+      setSettingsState(loadSettings());
+      setBottleState(loadBottleState());
+      setTargetRangeState(loadTargetRange());
       setSettingsLoading(false);
       return;
     }
@@ -164,6 +200,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (snapshot.exists()) {
           const data = snapshot.data();
           if (data.pillSettings) setSettingsState(data.pillSettings as PillSettings);
+          if (data.bottleState) setBottleState(data.bottleState as BottleState);
           if (data.targetRange) setTargetRangeState(data.targetRange as TargetRange);
         }
         setSettingsLoading(false);
@@ -179,22 +216,36 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [user]);
 
   const saveSettings = useCallback(async (pillSettings: PillSettings): Promise<void> => {
-    // Optimistic update
     setSettingsState(pillSettings);
-
-
     if (!user) return;
+    if (user.uid === 'guest_user') {
+      localStorage.setItem('pill_settings', JSON.stringify(pillSettings));
+      return;
+    }
     try {
       await setDoc(doc(db, `users/${user.uid}/settings`, 'appSettings'), { pillSettings }, { merge: true });
     } catch (e) { console.error('Firebase write error', e); }
   }, [user]);
 
-  const saveTargetRange = useCallback(async (range: TargetRange): Promise<void> => {
-    // Optimistic update
-    setTargetRangeState(range);
-
-
+  const saveBottleState = useCallback(async (newBottleState: BottleState): Promise<void> => {
+    setBottleState(newBottleState);
     if (!user) return;
+    if (user.uid === 'guest_user') {
+      localStorage.setItem('bottle_state', JSON.stringify(newBottleState));
+      return;
+    }
+    try {
+      await setDoc(doc(db, `users/${user.uid}/settings`, 'appSettings'), { bottleState: newBottleState }, { merge: true });
+    } catch (e) { console.error('Firebase write error', e); }
+  }, [user]);
+
+  const saveTargetRange = useCallback(async (range: TargetRange): Promise<void> => {
+    setTargetRangeState(range);
+    if (!user) return;
+    if (user.uid === 'guest_user') {
+      localStorage.setItem('inr_target_range', JSON.stringify(range));
+      return;
+    }
     try {
       await setDoc(doc(db, `users/${user.uid}/settings`, 'appSettings'), { targetRange: range }, { merge: true });
     } catch (e) { console.error('Firebase write error', e); }
@@ -203,10 +254,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const isLoading = pillLogLoading || inrResultsLoading || settingsLoading;
 
   const contextValue = useMemo(() => ({
-    pillLog, inrResults, settings, targetRange, isLoading,
-    savePillLog, saveINRResults, saveSettings, saveTargetRange
-  }), [pillLog, inrResults, settings, targetRange, isLoading,
-       savePillLog, saveINRResults, saveSettings, saveTargetRange]);
+    pillLog, inrResults, settings, bottleState, targetRange, isLoading,
+    savePillLog, saveINRResults, saveSettings, saveBottleState, saveTargetRange
+  }), [pillLog, inrResults, settings, bottleState, targetRange, isLoading,
+       savePillLog, saveINRResults, saveSettings, saveBottleState, saveTargetRange]);
 
   return (
     <DataContext.Provider value={contextValue}>
@@ -214,3 +265,4 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     </DataContext.Provider>
   );
 };
+

@@ -15,6 +15,7 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   signInWithGoogle: () => Promise<void>;
+  loginAsGuest: () => void;
   logout: () => Promise<void>;
 }
 
@@ -81,13 +82,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  const logout = useCallback(async () => {
-    await signOut(auth);
+  const loginAsGuest = useCallback(() => {
+    const guestUser = {
+      uid: 'guest_user',
+      displayName: 'Guest Demo',
+      email: 'demo@inrtracker.app',
+      emailVerified: true,
+      isAnonymous: true,
+    } as unknown as User;
+    setUser(guestUser);
   }, []);
 
+  const logout = useCallback(async () => {
+    if (user?.uid === 'guest_user') {
+      setUser(null);
+      return;
+    }
+    await signOut(auth);
+  }, [user]);
+
   const contextValue = useMemo(() => ({
-    user, loading, signInWithGoogle, logout
-  }), [user, loading, signInWithGoogle, logout]);
+    user, loading, signInWithGoogle, loginAsGuest, logout
+  }), [user, loading, signInWithGoogle, loginAsGuest, logout]);
 
   if (loading) {
     return (
